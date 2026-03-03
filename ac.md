@@ -6,7 +6,7 @@
 - https://quality.arc42.org/qualities/scalability
 
 **Why is it important?**
-- Publication of new grants may generate bursts of heavy usage, but most of the time sithe usage is scarce
+- Publication of new grants may generate bursts of heavy usage, but most of the time site usage is scarce
 
 ## Availability
 

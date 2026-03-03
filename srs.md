@@ -156,7 +156,7 @@ Other software interfaces:
 
         Provides the option to apply to a selected grant.
 
-    4.2.2	Stimulus/Response Sequences
+    4.2.2	Stimulus\/Response Sequences
         The user provides the required documentation and information for the application, and the system validates and in case of validity records the application, by storing all of its info. and doc..
 
     4.2.3	Functional Requirements
@@ -168,21 +168,40 @@ Other software interfaces:
             The system is able to securely store all provided and validated input and user data.
 
 
-4.3 notification by MundaMail
+4.3 Notification by MundaMail
 
     4.1.1	Description and Priority
+        Medium Priority
+
+        Provides a notification featutre, about the status of applications through the use of MundaMail.
 
     4.1.2	Stimulus/Response Sequences
+        Any change in the status of a given application will trigger an automatic notification via the MundaMail system.
 
     4.1.3	Functional Requirements
+        F-MM-01
+            The system is able to detect changes in application status automatically.
+        F-MM-02
+            The system is able to send a templated message through M.M. triggered by a detected change, with the correct values.
 
 4.4 Creating new grants
 
     4.1.1	Description and Priority
+        High Priority
 
+        Provides the ability co publicate grants in the system.
     4.1.2	Stimulus/Response Sequences
+        A User with the role of Public Administrator provides the required information for the creation of a new grant, and the system creates and stores the new grant publication.
 
     4.1.3	Functional Requirements
+        F-CG-01
+            The system is able to accept the format of the information. 
+        F-CG-02
+            The system is able to validate the format of the given inputs. 
+        F-CG-03
+            The system is able to create a new grant based on the provided information.
+        F-CG-04
+            The system is able to upload and store the created grant publication.
 
 4.5 Review and evaluate grant applications
 
