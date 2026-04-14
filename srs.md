@@ -219,31 +219,94 @@ Czumbil Márk
   ## 4.5 Review and evaluate grant applications
 
   ### 4.5.1	Description and Priority
+  High Priority
+
+  Provides the ability for Public Administrators to review submitted applications, score them based on grant-specific criteria, and record a final decision.
 
   ### 4.5.2	Stimulus/Response Sequences
+  A Public Administrator opens an application, verifies attached documentation, optionally uses the AI helper outputs, assigns scores per criterion, and submits a decision. The system stores the evaluation, records an audit trail entry, and triggers applicant notification.
 
   ### 4.5.3	Functional Requirements
+  ##### F-RE-01
+  The system shall display complete application data and all uploaded documents for authorized reviewers.
+
+  ##### F-RE-02
+  The system shall support grant-specific scoring models defined during grant creation.
+
+  ##### F-RE-03
+  The system shall require a decision status (approved/rejected/needs clarification) and an optional textual justification before finalization.
+
+  ##### F-RE-04
+  The system shall persist each evaluation change with timestamp, actor identity, and previous/new state values.
+
+  ##### F-RE-05
+  The system shall prevent final approval when mandatory documents are missing according to the selected grant definition.
 
   ## 4.6 AI (GF) helper tool
   ### 4.6.1	Description and Priority
+  Medium Priority
+
+  Provides AI-assisted analysis to reduce manual document review effort for Public Administrators.
 
   ### 4.6.2	Stimulus/Response Sequences
+  A reviewer requests AI assistance for an application. The system processes submitted documentation and returns a structured summary with detected issues and references to source sections.
 
   ### 4.6.3	Functional Requirements
+  ##### F-AI-01
+  The system shall generate an application summary containing key applicant attributes, requested amount, and mandatory document checklist status.
+
+  ##### F-AI-02
+  The system shall flag potential inconsistencies or missing information and mark them as recommendations only.
+
+  ##### F-AI-03
+  The system shall not allow AI output to finalize a decision without explicit human reviewer confirmation.
+
+  ##### F-AI-04
+  The system shall present traceable references from each AI finding to the original source document section when available.
+
+  ##### F-AI-05
+  The system shall log every AI assistance request for audit purposes.
 
   ## 4.7 Manage users
   ### 4.7.1	Description and Priority
+  High Priority
+
+  Provides user and role lifecycle management for System Administrators.
 
   ### 4.7.2	Stimulus/Response Sequences
+  A System Administrator creates, updates, disables, or re-enables a user account and assigns roles. The system validates authorization, applies changes, and records an audit entry.
 
   ### 4.7.3	Functional Requirements
+  ##### F-MU-01
+  The system shall support creating and disabling accounts for applicant, public administrator, and system administrator roles.
+
+  ##### F-MU-02
+  The system shall enforce role-based access control for all protected operations.
+
+  ##### F-MU-03
+  The system shall provide secure password reset and account recovery workflow.
+
+  ##### F-MU-04
+  The system shall record all role and status changes in an immutable audit log.
 
   ## 4.8 Manage other UIs
   ### 4.8.1	Description and Priority
+  Medium Priority
+
+  Provides centralized configuration management for applicant-facing and administration-facing web interfaces.
 
   ### 4.8.2	Stimulus/Response Sequences
+  A System Administrator updates UI-related configuration (for example banners, form labels, announcement content, and feature visibility). The system validates the change, applies it, and distributes it to the target UI.
 
   ### 4.8.3	Functional Requirements
+  ##### F-MO-01
+  The system shall allow authorized administrators to manage localized static content used by multiple user interfaces.
+
+  ##### F-MO-02
+  The system shall support enabling or disabling selected UI features without redeploying the whole platform.
+
+  ##### F-MO-03
+  The system shall keep versioned history of UI configuration changes with rollback capability.
 
 # 5.	Other Nonfunctional Requirements
   ## 5.1	Performance Requirements
@@ -257,10 +320,50 @@ Czumbil Márk
 
 
 ## 5.2	Safety Requirements
-<!--Specify those requirements that are concerned with possible loss, damage, or harm that could result from the use of the product. Define any safeguards or actions that must be taken, as well as actions that must be prevented. Refer to any external policies or regulations that state safety issues that affect the product’s design or use. Define any safety certifications that must be satisfied.-->
+  ##### NF-SA-01
+  The system shall prevent loss of submitted applications by storing a durable server-side draft snapshot at least every 30 seconds while a user edits an application form.
+
+  ##### NF-SA-02
+  The system shall provide explicit confirmation dialogs for destructive actions (for example withdrawing an application or deleting a grant draft).
+
+  ##### NF-SA-03
+  The system shall preserve all finalized application and evaluation records for at least 10 years to support legal and administrative review.
 ## 5.3	Security Requirements
-<!--Specify any requirements regarding security or privacy issues surrounding use of the product or protection of the data used or created by the product. Define any user identity authentication requirements. Refer to any external policies or regulations containing security issues that affect the product. Define any security or privacy certifications that must be satisfied.-->
+  ##### NF-SE-01
+  All personal and application data shall be stored and processed only on infrastructure physically located in Zamunda.
+
+  ##### NF-SE-02
+  The system shall enforce multi-factor authentication for Public Administrator and System Administrator accounts.
+
+  ##### NF-SE-03
+  The system shall encrypt data in transit using HTTPS/TLS 1.2+ and encrypt sensitive data at rest.
+
+  ##### NF-SE-04
+  The system shall produce tamper-evident security and audit logs for authentication, authorization, and data-modification events.
 ## 5.4	Software Quality Attributes
-<!--Specify any additional quality characteristics for the product that will be important to either the customers or the developers. Some to consider are: adaptability, availability, correctness, flexibility, interoperability, maintainability, portability, reliability, reusability, robustness, testability, and usability. Write these to be specific, quantitative, and verifiable when possible. At the least, clarify the relative preferences for various attributes, such as ease of use over ease of learning.-->
+  ##### NF-QA-01 (Availability)
+  The public applicant web interface shall provide at least 99.9% monthly availability, excluding planned maintenance windows.
+
+  ##### NF-QA-02 (Scalability)
+  At grant opening time, the platform shall support at least 20,000 concurrent applicant sessions while preserving p95 page response time under 2 seconds for read operations.
+
+  ##### NF-QA-03 (Auditability)
+  The system shall allow authorized auditors to reconstruct the full lifecycle of a grant application (submission, updates, evaluation actions, decision, notification) from system logs.
+
+  ##### NF-QA-04 (Usability)
+  Applicant-facing pages shall be usable on mobile devices with viewport widths from 360px and above without horizontal scrolling in core workflows.
+
+  ##### NF-QA-05 (Maintainability)
+  The system shall expose machine-readable API documentation for all internal service interfaces and keep it versioned with each production release.
 ## 5.5	Business Rules
-<!--List any operating principles about the product, such as which individuals or roles can perform which functions under specific circumstances. These are not functional requirements in themselves, but they may imply certain functional requirements to enforce the rules.-->
+  ##### BR-01
+  A grant application is accepted only if submitted within the defined opening and deadline interval of the selected grant.
+
+  ##### BR-02
+  A grant may only receive applications while remaining budget is greater than zero.
+
+  ##### BR-03
+  Only Public Administrators can create grants and evaluate applications.
+
+  ##### BR-04
+  Only System Administrators can create or modify privileged user accounts and role assignments.
