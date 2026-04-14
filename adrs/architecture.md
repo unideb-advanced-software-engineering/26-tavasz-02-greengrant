@@ -43,7 +43,18 @@ The key decision is: Which architectural style best ensures scalability, securit
 ## Decision Outcome
 
 Chosen option: Hybrid Service-Based with Event-Driven Architecture, because it best balances scalability, reliability, and maintainability. This approach allows the system to decompose core functionality into independent services while using event-driven patterns to handle high traffic and asynchronous workflows, such as mass grant submissions and AI-assisted document processing. It meets critical decision drivers like data residency, cost efficiency, and integration with the MundaMail API, while supporting future extensibility and alignment with ZDR’s sustainability goals.
-<!-- This is an optional element. Feel free to remove. -->
+
+## C4 model views
+
+The project now includes a native LikeC4 model:
+
+- Model source: [c4/greengrant.c4](./c4/greengrant.c4)
+
+Defined views in the LikeC4 model:
+
+- `l1_context` - C4 Level 1 (System Context)
+- `l2_containers` - C4 Level 2 (Container)
+- `l3_application_service` - C4 Level 3 (Component)
 ### Consequences
 
 #### Pros  
