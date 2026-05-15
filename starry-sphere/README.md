@@ -1,23 +1,65 @@
-# Starlight Starter Kit: Basics
+# GreenGrant Documentation Site
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+Documentation for the GreenGrant platform – Astro + Starlight based.
+
+Built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build/).
+
+## 🚀 Quick Start
+
+### Install & Run
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+The site will be available at `http://localhost:3000`.
+
+## 📖 Documentation Contents
+
+- **Specifications** – SRS, Architectural Characteristics, ASRs
+- **Architecture** – Styles, patterns, design decisions
+- **ADRs** – Architectural Decision Records (5 total)
+- **C4 Diagrams** – System context and container diagrams
+
+## 📁 Project Structure
 
 ```
-npm create astro@latest -- --template starlight
+src/content/docs/
+├── index.mdx                  # Welcome page
+├── general/                   # Getting Started
+├── specification/             # SRS, AC, ASR
+├── architecture/
+│   └── styles.md             # Architecture Styles
+└── adrs/                      # ADRs (auto-organized)
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## ✏️ Editing
 
-## 🚀 Project Structure
+Add or edit `.md` files in `src/content/docs/`. The sidebar auto-updates.
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+Example:
+```yaml
+---
+title: "My Page"
+description: "Short description"
+---
 
+# Content
 ```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
+
+## 🔗 Links
+
+- **GitHub:** https://github.com/unideb-advanced-software-engineering/26-tavasz-02-greengrant
+- **Astro Docs:** https://docs.astro.build/
+- **Starlight Docs:** https://starlight.astro.build/
+
 │   │   └── docs/
 │   └── content.config.ts
 ├── astro.config.mjs

@@ -46,8 +46,9 @@ model {
       }
     }
 
-    backend_api = service 'Backend API' {
-      technology 'REST API'
+    backend_api = service 'API Gateway' {
+      technology 'REST API Gateway'
+      description 'Entry point for web applications, routes requests to backend services'
     }
 
     identity_access = service 'Identity and Access' {
@@ -73,9 +74,37 @@ model {
       submission_orchestrator -> audit_writer 'records domain audit trail'
     }
 
-    review_service = service 'Review Service'
-    ai_assistant = service 'AI Assistant Service'
-    notification_worker = service 'Notification Worker'
+    review_service = service 'Review Service' {
+      description 'Handles grant application evaluation, scoring, and decision recording'
+      query_api = component 'Review Query API'
+      decision_engine = component 'Decision Engine'
+      scoring_evaluator = component 'Scoring Evaluator'
+      event_emitter = component 'Event Emitter'
+
+      query_api -> decision_engine 'retrieves application for review'
+      query_api -> scoring_evaluator 'manages scoring workflow'
+      decision_engine -> event_emitter 'publishes decision events'
+    }
+
+    ai_assistant = service 'AI Assistant Service' {
+      description 'Provides AI-powered document analysis and summarization'
+      document_analyzer = component 'Document Analyzer'
+      llm_interface = component 'LLM Interface'
+      result_formatter = component 'Result Formatter'
+
+      document_analyzer -> llm_interface 'sends documents for analysis'
+      llm_interface -> result_formatter 'formats AI output for reviewers'
+    }
+
+    notification_worker = service 'Notification Worker' {
+      description 'Event consumer that sends notifications via MundaMail'
+      event_consumer = component 'Event Consumer'
+      notification_composer = component 'Notification Composer'
+      mail_sender = component 'Mail Sender'
+
+      event_consumer -> notification_composer 'prepares notification content'
+      notification_composer -> mail_sender 'sends via MundaMail'
+    }
 
     core_db = database 'Core Database' {
       technology 'PostgreSQL'
@@ -110,13 +139,17 @@ model {
 
     application_service -> event_bus 'publishes application events'
     review_service -> event_bus 'publishes decision events'
-    notification_worker -> event_bus 'consumes decision events'
+    ai_assistant -> event_bus 'publishes analysis complete events'
+    notification_worker -> event_bus 'consumes notification events'
     notification_worker -> mundamail 'sends decision notifications'
 
-    backend_api -> audit_log 'writes security and access logs'
+    backend_api -> audit_log 'writes API and access logs'
     application_service -> audit_log 'writes domain audit events'
-    review_service -> audit_log 'writes review trail'
-    ai_assistant -> audit_log 'writes AI usage trail'
+    review_service -> audit_log 'writes review audit trail'
+    ai_assistant -> audit_log 'writes AI assistance audit trail'
+    identity_access -> audit_log 'writes authentication events'
+
+    grant_service -> event_bus 'publishes grant lifecycle events'
   }
 
   applicant -> greengrant.applicant_web 'searches grants and submits applications'
@@ -126,17 +159,38 @@ model {
 
 views {
   view l1_context {
-    title 'C4 L1 - System Context'
+    title 'C4 L1 - System Context: GreenGrant in the Zamunda Ecosystem'
+    description 'Shows the actors (Applicant, Public Administrator, System Administrator), the GreenGrant Platform system, and the external MundaMail API service.'
     include applicant, public_admin, system_admin, greengrant, mundamail
   }
 
   view l2_containers of greengrant {
-    title 'C4 L2 - Container View'
+    title 'C4 L2 - Container View: GreenGrant Platform Architecture'
+    description 'Shows the major containers (web apps, services, databases, event bus) and their interactions. This represents the microservices architecture with event-driven communication.'
     include *
   }
 
   view l3_application_service of greengrant.application_service {
-    title 'C4 L3 - Application Service Components'
+    title 'C4 L3 - Application Service: Component Details'
+    description 'Breaks down the Application Service into its main components (API, Validation, Document Intake, Event Publishing, Audit Writing) and their interactions.'
+    include *
+  }
+
+  view l3_review_service of greengrant.review_service {
+    title 'C4 L3 - Review Service: Component Details'
+    description 'Shows the Review Service components responsible for application evaluation, scoring, and decision making.'
+    include *
+  }
+
+  view l3_ai_assistant of greengrant.ai_assistant {
+    title 'C4 L3 - AI Assistant Service: Component Details'
+    description 'Illustrates the AI Assistant Service used for document analysis and applicant summarization.'
+    include *
+  }
+
+  view l3_notification_worker of greengrant.notification_worker {
+    title 'C4 L3 - Notification Worker: Component Details'
+    description 'Details the Notification Worker service that consumes events and sends notifications via MundaMail.'
     include *
   }
 }
