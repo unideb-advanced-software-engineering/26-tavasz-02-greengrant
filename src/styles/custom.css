@@ -31,12 +31,11 @@
 
 /* Make hero image bigger */
 .hero img {
-  object-fit: contain !important;
-  width: 2000px; /* increase this */
-  height: auto;
+  width: 100%; /* increase this */
+  height: 100%; /* increase this */
 }
 
 /* Optional: increase container size */
 .hero .hero-image {
-  aspect-ratio: auto;
+    object-fit: contain !important;
 }
