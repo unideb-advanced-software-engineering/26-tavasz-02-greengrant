@@ -28,23 +28,14 @@
     --sl-color-black: #f0fff6;
 }
 
-/* Increase splash/hero image box size so logos fit comfortably */
-.splash .hero img,
-.splash-hero img,
-.hero-image img,
-.starlight-splash img,
+
+/* Make hero image bigger */
 .hero img {
-    max-height: 240px;
-    width: auto;
-    object-fit: contain;
+  max-width: 1200px; /* increase this */
+  height: auto;
 }
 
-@media (max-width: 768px) {
-    .splash .hero img,
-    .splash-hero img,
-    .hero-image img,
-    .starlight-splash img,
-    .hero img {
-        max-height: 160px;
-    }
+/* Optional: increase container size */
+.hero .hero-image {
+  max-width: 1200px;
 }
