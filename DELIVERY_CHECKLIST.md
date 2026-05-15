@@ -62,30 +62,30 @@
 - **Fájlok:** `/adrs/` és `/starry-sphere/src/content/docs/adrs/`
 - **Status:** TELJESÜL (5 ADR)
 
-#### ADR-001: Hybrid Architecture
-- **Fájl:** `/adrs/architecture.md` + Astro
-- **Status:** TELJES
-- **Tartalom:** Context, Problem, Decision Drivers, Options, Decision Outcome, Consequences
-
-#### ADR-002: Polyglot Persistence Strategy
-- **Fájl:** `/adrs/adr-002-data-storage.md` + Astro
+#### ADR-01: Polyglot Persistence Strategy
+- **Fájl:** `/adrs/adr-01-data-storage.md` + Astro
 - **Status:** TELJES
 - **Tartalom:** PostgreSQL + Append-Only + Object Storage; Indoklás, Consequences
 
-#### ADR-003: Centralized Identity and Access Management
-- **Fájl:** `/adrs/adr-003-authentication-authorization.md` + Astro
+#### ADR-02: Centralized Identity and Access Management
+- **Fájl:** `/adrs/adr-02-authentication-authorization.md` + Astro
 - **Status:** TELJES
 - **Tartalom:** OAuth2/JWT + MFA + RBAC; Detailed Design, Consequences
 
-#### ADR-004: Asynchronous Document Upload and Management
-- **Fájl:** `/adrs/adr-004-document-management.md` + Astro
+#### ADR-03: Asynchronous Document Upload and Management
+- **Fájl:** `/adrs/adr-03-document-management.md` + Astro
 - **Status:** TELJES
 - **Tartalom:** Async Upload Pattern; SSE/Polling; Validation; Consequences
 
-#### ADR-005: Event-Driven Communication via Kafka
-- **Fájl:** `/adrs/adr-005-event-driven-communication.md` + Astro
+#### ADR-04: Event-Driven Communication via Kafka
+- **Fájl:** `/adrs/adr-04-event-driven-communication.md` + Astro
 - **Status:** TELJES
 - **Tartalom:** Kafka Message Bus; Topics, Consumers, Error Handling; Consequences
+
+#### ADR-05: Separate Web Frontends and API Gateway
+- **Fájl:** `/adrs/adr-05-web-frontends-and-gateway.md` + Astro
+- **Status:** TELJES
+- **Tartalom:** Applicant/Admin frontend separation; API Gateway; UX, security, scalability reasons
 
 **ADR Stílusok:** NYGARD/MADR stílus (Context, Decision Drivers, Options, Outcome, Consequences)
 
@@ -128,11 +128,11 @@
   - [x] **Architecture Section**
     - [x] Architecture Styles (`architecture/styles.md`)
   - [x] **ADRs Section**
-    - [x] ADR-001 (`adrs/architecture.md`)
-    - [x] ADR-002 (`adrs/adr-002-data-storage.md`)
-    - [x] ADR-003 (`adrs/adr-003-authentication-authorization.md`)
-    - [x] ADR-004 (`adrs/adr-004-document-management.md`)
-    - [x] ADR-005 (`adrs/adr-005-event-driven-communication.md`)
+    - [x] ADR-01 (`adrs/adr-01-data-storage.md`)
+    - [x] ADR-02 (`adrs/adr-02-authentication-authorization.md`)
+    - [x] ADR-03 (`adrs/adr-03-document-management.md`)
+    - [x] ADR-04 (`adrs/adr-04-event-driven-communication.md`)
+    - [x] ADR-05 (`adrs/adr-05-web-frontends-and-gateway.md`)
   - [x] **Navigation** - Sidebar Astro konfigurációval
   - [x] **Config frissítve** (`astro.config.mjs`)
   - [x] **README** (`starry-sphere/README.md`)

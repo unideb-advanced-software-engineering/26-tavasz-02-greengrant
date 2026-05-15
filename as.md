@@ -2,7 +2,7 @@
 
 ## Overview
 
-GreenGrant adopts a **Hybrid Service-Based with Event-Driven Architecture**, combining the benefits of service decomposition with asynchronous event-driven communication patterns. This architecture is documented in detail in [ADR-001: Hybrid Architecture](./adrs/architecture.md).
+GreenGrant adopts a **Hybrid Service-Based with Event-Driven Architecture**, combining the benefits of service decomposition with asynchronous event-driven communication patterns. This architecture is documented in detail in [Architecture](./architecture.md).
 
 ## Primary Style: Service-Based Architecture
 
