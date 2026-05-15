@@ -1,0 +1,51 @@
+---
+title: "Case Study: ChocoMarket"
+description: "A case study of the ChocoMarket system, which is part of the Zamunda Digital Renaissance program."
+---
+
+
+## Background
+
+> Based on the story of the films titled [Coming to America](https://en.wikipedia.org/wiki/Coming_to_America) and [Coming to America 2](https://en.wikipedia.org/wiki/Coming_2_America)
+
+After the death of King Jaffe Jofer, his son Akeem took the throne of Zamunda. However, listening to the voice of the times, King Akeem decided to involve his daughter Meeka in the reign.
+
+Meeka wants to use modern tools to bring prosperity to Zamunda. She recognized that the key to development is digital transformation: independent IT infrastructure and digital government, combined with the use of renewable energy sources and climate-friendly solutions.
+
+This digital transformation program is called the Zamunda Digital Renaissance (ZDR).
+
+### General requirements of the ZDR program
+
+- Since this is a government program, it is very important that all projects are accompanied by documentation of sufficient quantity and quality.
+- Zamunda is not a poor country, but it does not want to waste money unnecessarily: projects must be planned with economy in mind. Climate-friendly goals also require this!
+- It should be noted that internet coverage is not perfect in certain areas of the country. Even where there is internet, there may be higher delays and lower bandwidths.
+
+## Description
+
+Zamunda is extremely proud of its cocoa production and emerging chocolate industry. Currently, however, manufacturers' offerings are difficult to access and compare: rapidly changing inventories can only be tracked via email and phone calls or outdated websites. That's why a common, nationwide platform is needed: ChocoMarket.
+
+### Real world example
+
+Think of a platform like [Árukereső](https://www.arukereso.hu/), only here we also handle quantities and everything is chocolate.
+
+## Users
+
+- Chocolate manufacturers, of which there are currently around 50 in the country, but their number is growing every year.
+- Companies interested in chocolate, who can browse it from all over the world.
+
+## Requirements
+
+- Manufacturers make their inventories available in a variety of formats: they upload them to an FTP server, send them by email, provide an HTTP API, and so on. Of course, the file formats can also vary: XML, CSV, JSON. ChocoMarket must be able to handle all of these sources.
+- It must strive to display the most up-to-date inventory information possible.
+- Manufacturers can view their scanned inventories as well as previous inventory scanning attempts.
+- Manufacturers have identical products (such as 100-gram bars of chocolate with 72% cocoa content), and the inventories associated with these products must be managed as a single entity. However, it is important to remember that even though the product is identical, other attributes (such as price) may differ!
+- Display of products, including stocks by manufacturer, in web format.
+- Display of product stock and price history in web format.
+- Interested parties can subscribe to stock notifications.
+- The web interface should be available in multiple languages.
+
+## Additions
+
+- It is not possible to make purchases through the system; it is only used to assess manufacturers' stocks and connect manufacturers and buyers.
+- A long-term goal is that, at some point in the future, it will also be possible to make purchases through the platform.
+- There is no need to manage special offers or promotions.

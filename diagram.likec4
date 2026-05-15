@@ -1,0 +1,180 @@
+specification {
+    element user {
+        style {
+            shape person
+            color green
+        }
+    }
+
+    element system {
+      style {
+        color muted
+      }
+    }
+    element subsystem
+
+    element externalSystem {
+      style {
+        color amber
+      }
+    }
+
+    element database {
+      style {
+        shape cylinder
+        color gray
+      }
+    }
+
+    element container
+
+    element frontend {
+      style {
+        shape browser
+        color indigo
+      }
+    }
+
+    element topic {
+      style {
+        shape queue
+        color gray
+      }
+    }
+
+    element bucket {
+      style {
+        shape bucket
+        color gray
+      }
+    }
+}
+
+model {
+  admin = user 'Admin' {
+    description 'An internal administrator.'
+  }
+  supplier = user 'Supplier' {
+    description 'A chocolate supplier.'
+  }
+  buyer = user 'Buyer' {
+    description 'Chocolate buyer.'
+  }
+
+  chocoMarket = system 'ChocoMarket' {
+    mainDatabase = database 'Main Database' {
+      description """
+      Stores everything from user data to chocolates.
+      """
+    }
+
+    catalogServing = subsystem 'Catalog Serving Subsystem' {
+      adminFrontend = frontend 'Admin Frontend'
+      supplierFrontend = frontend 'Supplier Frontend'
+      buyerFrontend = frontend 'Buyer Frontend'
+      centralWebApp = container 'Central Web App' {
+        description """
+        Does everything HTTP-related.
+        """
+
+        style {
+          multiple true
+        }
+      }
+      asyncWorker = container 'Async Worker' {
+        description """
+        Background and periodic tasks.
+        """
+
+        style {
+          multiple true
+        }
+      }
+
+      admin -> adminFrontend 'uses'
+      supplier -> supplierFrontend 'uses'
+      buyer -> buyerFrontend 'uses'
+
+      adminFrontend -> centralWebApp
+      supplierFrontend -> centralWebApp
+      buyerFrontend -> centralWebApp
+
+      centralWebApp -> mainDatabase 'Reads/writes.'
+      centralWebApp -> asyncWorker 'Submits jobs.'
+      asyncWorker -> mainDatabase 'Reads/writes.'
+    }
+
+    catalogProcessing = subsystem 'Catalog Processing Subsystem' {
+      catalogReader = container 'Catalog Reader' {
+        description """
+        Polls/receives the supplier catalogs.
+        """
+      }
+      readCatalogs = topic 'Read Catalogs' {
+        description """
+        Transmits entire read supplier catalogs in a normalized format.
+        """
+      }
+      readCatalogStorage = bucket 'Read Catalog Storage' {
+        description """
+        Long-term storage for read catalogs.
+        """
+      }
+      catalogProcessor = container 'Catalog Processor' {
+        description """
+        Processes the catalogs into individual items.
+        """
+
+        style {
+          multiple true
+        }
+      }
+      catalogItems = topic 'Catalog Items' {
+        description """
+        Transmits the individual catalog items.
+        """
+      }
+      catalogItemStorage = bucket 'Catalog Item Storage' {
+        description """
+        Long-term storage for processed catalog items.
+        """
+      }
+      catalogWriter = container 'Catalog Writer' {
+        description """
+        Writes items into the DB.
+        """
+      }
+
+      catalogReader -> catalogSources 'Polls/receives from'
+      catalogReader -> readCatalogs 'Pushes entire catalogs'
+      catalogReader -> readCatalogStorage 'Persists entire catalogs'
+      readCatalogs -> catalogProcessor 'Entire catalogs'
+      catalogProcessor -> catalogItems 'Pushes individual items.'
+      catalogProcessor -> catalogItemStorage 'Writes items from the same catalog.'
+      catalogItems -> catalogWriter 'Individual items. Batched.'
+      catalogWriter -> mainDatabase 'Writes the chocolates.'
+    }
+  }
+
+  catalogSources = externalSystem 'Catalog Sources' {
+    description """
+    The catalogs of our suppliers.
+    """
+  }
+}
+
+views {
+  view systemContextDiagram {
+    title 'System Context'
+
+    include *
+  }
+
+  view containerDiagram of chocoMarket {
+    title 'Container'
+
+    include *
+    include catalogServing.*
+    include catalogProcessing.*
+  }
+}

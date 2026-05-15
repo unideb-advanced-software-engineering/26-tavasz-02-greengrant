@@ -1,0 +1,60 @@
+---
+title: "Architectural Style"
+description: "The architectural style of the system."
+---
+
+# Architectural Style
+
+The architectural styles chosen for the project are as follows:
+
+- Event-driven architecture.
+- Modular monolith.
+
+## Why two styles?
+
+ChocoMarket (as a complete system) can be broken down into two subsystems with different quality characteristics and ASRs:
+
+- The system responsible for scanning and processing inventory.
+- The system that enables inventory browsing.
+
+In order to best meet the requirements of both systems, we accept the following consequences of maintaining two styles simultaneously:
+
+- higher costs,
+- greater complexity,
+- lower maintainability.
+
+## Why EDA?
+
+### Fit
+
+EDA is an excellent choice given the architectural characteristics of ChocoMarket’s inventory scanning component (extensibility, interoperability, low latency, scalability), because:
+
+- New event types and processors can be easily added for new suppliers.
+- New processing mechanisms can be easily built on top of existing events.
+- It can handle even massive volumes of incoming data.
+
+### Trade-offs
+
+However, the following points should not be overlooked:
+
+- Relatively high costs (which can be problematic for a government project).
+- Concerns regarding testability and maintainability (which are relevant, since we intend to operate the system for many, many years).
+
+## Why a Modular Monolith?
+
+### Fit
+
+There are no specific requirements for the ChocoMarket inventory browser component, so we can prioritize general characteristics such as
+
+- low cost,
+- simplicity,
+- maintainability.
+
+The modular monolith architectural style perfectly meets these quality criteria.
+
+### Trade-offs
+
+At the same time, we must be mindful of the following trade-offs:
+
+- We can expect visitors from all over the world, but this style is not known for its scalability or elasticity.
+- When adding new functionality, the issue of architectural evolution will inevitably arise: for example, the introduction of service-based architecture.
