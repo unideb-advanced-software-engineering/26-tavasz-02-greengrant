@@ -2,8 +2,8 @@
 # GreenGrant
 ### Version 1.0 approved
 #### Prepared by:
-Bóna Noel
-Angi Dávid
+Bóna Noel,
+Angi Dávid,
 Czumbil Márk
 
 <br/><br/><br/>
@@ -84,6 +84,7 @@ Czumbil Márk
   -	notification by MundaMail
 
   Public Administration facing(Web Site):
+  - Listing/Searching currently available grants
   -	Creating new grants
   -	Review and evaluate grant applications
   -	AI (GF) helper tool
@@ -121,9 +122,9 @@ Czumbil Márk
 
   The system provides the following user interfaces:
   -	Web interface
-  o	compatible with mobile and desktop usage 
-  o	contains different views for each different  role
-  o	integrated AI tool
+    - compatible with mobile and desktop usage 
+    -	contains different views for each different  role
+    -	integrated AI tool
 
   ## 3.2	Hardware Interfaces
 
@@ -139,7 +140,7 @@ Czumbil Márk
   ## 3.4	Communications Interfaces
 
   -	for the web interface HTTPS
-  -	SFTP for document uploads
+  -	S3 API Protocol for document uploads
   -	Notifications email through MundaMail
 
 # 4.	System Features
