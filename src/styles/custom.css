@@ -31,11 +31,12 @@
 
 /* Make hero image bigger */
 .hero img {
-  max-width: 1200px; /* increase this */
+  max-width: 2000px; /* increase this */
   height: auto;
 }
 
 /* Optional: increase container size */
 .hero .hero-image {
-  max-width: 1200px;
+  max-width: 3000px;
+  height: 3000px;
 }
