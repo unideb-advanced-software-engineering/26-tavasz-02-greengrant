@@ -1,4 +1,4 @@
-# ADR-003: Centralized Identity and Access Management with MFA and RBAC
+# ADR-005: Centralized Identity and Access Management with MFA and RBAC
 
 - Status: Active
 - Date: 2026-05-15

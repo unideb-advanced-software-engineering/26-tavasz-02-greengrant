@@ -29,7 +29,7 @@ A single database cannot efficiently serve all three patterns without compromisi
 - **Pros:** Single point of administration; single backup/recovery strategy.
 - **Cons:** Bloats the database; audit compliance harder to enforce (standard SQL queries can mutate audit rows); object storage access patterns are inefficient; cost scales poorly for large files.
 
-### Option B: Polyglot Persistence (PostgreSQL + Append-Only + Object Storage)
+### Option B: Polyglot Persistence (PostgreSQL + Append-Only + MinIO)
 - **Core DB (PostgreSQL):** Operational state (users, grants, applications, evaluations, decisions).
 - **Audit Log Store (Append-only database or log-structured store):** Immutable history of all state-changing actions.
 - **Document Store (S3-compatible or Cloud Object Storage):** Binary files uploaded by applicants, indexed by application ID and file hash.

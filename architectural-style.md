@@ -72,13 +72,13 @@ Services communicate asynchronously through domain events published to an event 
 
 The system uses a **polyglot persistence** approach:
 
-- **Core Database (PostgreSQL)** – Transactional storage for grants, applications, user accounts, business rules.
-- **Audit Log Store (Append-only DB)** – Immutable history of all state-modifying actions for legal compliance.
-- **Document Store (Object Storage)** – Large files (PDFs, images) uploaded by applicants; supports efficient access and archival.
+- **Core Database** – Transactional storage for grants, applications, user accounts, business rules.
+- **Audit Log Store** – Immutable history of all state-modifying actions for legal compliance.
+- **Document Store** – Large files (PDFs, images) uploaded by applicants; supports efficient access and archival.
 
 ### Why Polyglot?
 
-- PostgreSQL provides ACID guarantees for operational data and transactional integrity.
+- A relational database provides ACID guarantees for operational data and transactional integrity.
 - Append-only storage prevents tampering and supports legal audit trails.
 - Object storage optimizes cost and access patterns for large binary assets.
 
@@ -89,7 +89,7 @@ The system uses a **polyglot persistence** approach:
 - Each microservice runs in its own container, potentially multiple replicas for availability.
 - Services communicate over HTTPS for all inter-service calls.
 - Event bus (Kafka) runs with replication for durability and fault tolerance.
-- Data stores (PostgreSQL, object storage) are managed with backup, replication, and disaster recovery policies.
+- Data stores (relational database, object storage) are managed with backup, replication, and disaster recovery policies.
 
 All infrastructure and data remain within Zamunda's territory per legal requirements.
 

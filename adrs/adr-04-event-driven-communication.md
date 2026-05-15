@@ -1,4 +1,4 @@
-# ADR-005: Event-Driven Communication via Kafka Message Bus
+# ADR-004: Event-Driven Communication via Kafka Message Bus
 
 - Status: Active
 - Date: 2026-05-15
@@ -103,70 +103,24 @@ If communication is synchronous (service A calls service B, which calls service 
 | `notification.sent` | Notification Worker | Audit Service, Analytics | 1 year |
 | `ai.analysis_complete` | AI Service | Review Service, Audit Service | 90 days |
 
-### Event Schema (Example: `application.submitted`)
-
-```json
-{
-  "event_id": "evt-12345-uuid",
-  "event_type": "application.submitted",
-  "timestamp": "2026-05-15T10:30:00Z",
-  "entity_id": "app-67890-uuid",
-  "aggregate_id": "applicant-xyz-uuid",
-  "version": 1,
-  "data": {
-    "application_id": "app-67890-uuid",
-    "grant_id": "grant-123-uuid",
-    "applicant_id": "applicant-xyz-uuid",
-    "applicant_email": "john@example.com",
-    "submission_timestamp": "2026-05-15T10:30:00Z",
-    "document_count": 3,
-    "documents": [
-      {
-        "upload_id": "upload-1",
-        "file_name": "tax_return.pdf",
-        "object_id": "doc-obj-1"
-      }
-    ]
-  },
-  "metadata": {
-    "source_service": "application-service",
-    "correlation_id": "corr-req-123",
-    "user_id": "user-123"
-  }
-}
-```
-
-### Kafka Cluster Configuration
-
-**Partitioning Strategy:**
-- Topic `application.submitted` partitioned by `applicant_id` (ensures all events for one applicant go to same partition; supports ordering).
-- Replication factor: 3 (for durability within Zamunda's infrastructure).
-- Retention: 10 years for critical topics (application, decision, audit); 90 days for operational topics (grant lifecycle).
-- Compression: Snappy (balances CPU and space).
 
 ### Consumer Groups
 
 **Notification Worker:**
 - Consumer group: `notification-workers`
-- Subscribes to: `application.submitted`, `evaluation.decision_finalized`, `grant.opened`
 - Commits offset after successful MundaMail delivery (with retry).
-- Parallelism: Multiple consumer instances reading partitions in parallel.
+
 
 **Audit Service:**
 - Consumer group: `audit-service`
-- Subscribes to: `application.*`, `evaluation.*`, `document.*`
 - Writes events to append-only audit log store (PostgreSQL or dedicated audit DB).
-- Parallelism: Single consumer (to maintain event order in audit log, or multiple with careful partition handling).
 
 **AI Service:**
 - Consumer group: `ai-service`
-- Subscribes to: `application.submitted`
 - Initiates document analysis on subscription.
-- Publishes `ai.analysis_complete` when done.
 
 **Review Service:**
 - Consumer group: `review-service`
-- Subscribes to: `ai.analysis_complete`
 - Makes AI results available to reviewers.
 
 ### Error Handling & Dead-Letter Topics
@@ -180,20 +134,6 @@ If communication is synchronous (service A calls service B, which calls service 
 - Events include a `version` field.
 - Consumers check version and apply transformation logic if needed (e.g., old events lack a field; consumer provides default).
 - New fields are optional; old fields are never removed (appended instead).
-
-### Eventual Consistency Handling
-
-**Example: Budget Decrement on Application Decision**
-
-1. Review Service writes decision to Core DB (strong consistency).
-2. Review Service publishes `evaluation.decision_finalized` event.
-3. Grant Service consumes event and decrements budget.
-4. During the window between steps 2 and 3, the grant's budget is temporarily inconsistent (not yet decremented).
-
-**Mitigation:**
-- Read-heavy queries (e.g., "how much budget is left?") are approximate; they include both confirmed and in-flight decisions.
-- Critical writes (e.g., "can we accept one more application?") check Core DB, which is eventually updated by Grant Service.
-- UI shows "approximately X budget remaining" to set expectations.
 
 ### Monitoring & Observability
 

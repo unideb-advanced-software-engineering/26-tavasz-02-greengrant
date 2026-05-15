@@ -1,0 +1,173 @@
+# ADR-003: Database and Storage Technology Stack
+
+- Status: Active
+- Date: 2026-05-15
+- Decision Makers: Architecture/Data Team
+
+## Context and Problem Statement
+
+[ADR-02: Polyglot Persistence Strategy](./adr-02-data-storage.md) established that GreenGrant will use three specialized data stores: a transactional core database, an append-only audit log store, and a document/object store. However, the specific technology implementations for each store were not yet selected.
+
+**The Problem:** Multiple viable technologies exist for each store pattern. Without explicit technology choices, development teams lack clarity on setup, configuration, and operational practices:
+
+1. **Core Database:** PostgreSQL vs. MySQL vs. other relational databases?
+2. **Append-Only Store:** Dedicated append-only database, PostgreSQL with constraints, TimescaleDB, or log-structured store?
+3. **Document Store:** MinIO vs. AWS S3 vs. other S3-compatible or cloud object storage?
+
+## Decision Drivers
+
+- **Data Residency [ASR: Data Localization]** – All storage must remain within Zamunda; selected technologies must support on-premises deployment.
+- **Operational Simplicity** – Minimize the number of distinct database systems to manage; prefer technologies familiar to the team.
+- **License Compliance** – Use open-source or commercially viable licensing; avoid vendor lock-in.
+- **Cloud-Native Readiness** – Selected technologies should be deployable in Kubernetes for modern infrastructure.
+- **Cost Efficiency [ASR]** – Minimize operational overhead and licensing costs.
+- **Audit Requirements [NF-SE-04]** – Append-only store must prevent accidental or malicious tampering.
+- **Performance at Scale** – Must handle tens of thousands of concurrent users and millions of documents.
+
+## Considered Options
+
+### Option A: PostgreSQL for All Three Patterns
+- Use PostgreSQL 16+ for operational data, audit logs, and document metadata.
+- Store documents as `bytea` large objects or in external files referenced by PostgreSQL.
+- **Pros:** Single database system; unified backup/recovery; team familiarity.
+- **Cons:** Bloats PostgreSQL; audit integrity harder to enforce (standard SQL can mutate audit rows); document storage inefficient; cost scales poorly for large files.
+
+### Option B: PostgreSQL + Dedicated Append-Only Store + MinIO
+- **Core DB:** PostgreSQL 16+ for operational state (users, grants, applications, evaluations).
+- **Audit Store:** Dedicated append-only technology (EventStoreDB, TimescaleDB in immutable mode, or PostgreSQL with strict access controls).
+- **Document Store:** MinIO for object storage.
+- **Pros:** Each system optimized for its pattern; audit integrity guaranteed by design; cost-efficient for large files.
+- **Cons:** Three systems to maintain; coordination overhead between stores.
+
+### Option C: PostgreSQL + EventStoreDB + S3 (AWS)
+- Similar to Option B but uses EventStoreDB (specialized event sourcing database) for audit/append-only.
+- Documents stored in AWS S3.
+- **Pros:** EventStoreDB is battle-tested for immutable logs; S3 is highly reliable.
+- **Cons:** AWS S3 violates data residency requirement (Zamunda); EventStoreDB adds operational complexity; higher licensing cost.
+
+### Option D: PostgreSQL + PostgreSQL Append-Only Table + MinIO
+- Use PostgreSQL for both operational and audit data, with strict access control on audit tables.
+- Documents stored in MinIO.
+- **Pros:** Unified PostgreSQL deployment; minimal infrastructure; cost-effective.
+- **Cons:** Append-only constraint enforced by application logic, not database design; lower audit integrity than dedicated store; risk of accidental audit mutations.
+
+## Decision Outcome
+
+**Chosen: Option B (PostgreSQL + Append-Only Store + MinIO)**
+
+### Specific Technologies
+
+#### 1. Core Database: PostgreSQL 16+
+- **Deployment:** On-premises in Kubernetes cluster within Zamunda.
+- **Schema:** Operational state (users, grants, applications, evaluations, document_metadata).
+- **Constraints:**
+  - Foreign keys for referential integrity.
+  - Timestamps on all tables for audit correlation.
+  - Soft deletes via status columns.
+- **Configuration:**
+  - Replication: Multi-region (within Zamunda territory) for high availability.
+  - Backups: Automated daily, 30-day retention.
+  - Monitoring: PostgreSQL exporter for Prometheus, alerting on replication lag and query performance.
+- **Rationale:** PostgreSQL is open-source, widely supported, performant at scale, and familiar to most development teams. Version 16+ provides excellent reliability and modern features (pg_stat_statements, logical replication).
+
+#### 2. Append-Only Audit Store: PostgreSQL with Application-Level Constraints
+- **Implementation:** Dedicated PostgreSQL instance with a single `audit_log` table.
+- **Schema:**
+  ```sql
+  CREATE TABLE audit_log (
+    event_id BIGSERIAL PRIMARY KEY,
+    timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    actor_id UUID NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    entity_type VARCHAR(100) NOT NULL,
+    entity_id VARCHAR(255) NOT NULL,
+    previous_state JSONB,
+    new_state JSONB,
+    correlation_id UUID,
+    CONSTRAINT audit_log_immutable CHECK (event_id IS NOT NULL)
+  );
+  ```
+- **Access Control:**
+  - Create a dedicated read-only user (`audit_reader`) with SELECT-only permissions.
+  - Create a dedicated append-only user (`audit_writer`) with INSERT-only permissions.
+  - Revoke UPDATE and DELETE permissions on this table.
+  - Consider WAL archiving and point-in-time recovery (PITR) to detect tampering.
+- **Retention:**
+  - All logs retained for 10 years.
+  - After 1 year: Archive to cold storage (compressed backups).
+- **Rationale:** 
+  - Keeps infrastructure simple (single PostgreSQL instance for both operational and audit).
+  - Application-level write-once enforcement combined with database access control provides strong audit integrity.
+  - Familiar technology; no additional systems to learn or support.
+  - Cost-effective compared to licensing a separate append-only database.
+
+#### 3. Document Store: MinIO
+- **Deployment:** On-premises in Kubernetes cluster within Zamunda.
+- **Configuration:**
+  - MinIO distributed mode with 4+ nodes for high availability.
+  - Versioning enabled on buckets.
+  - Encryption at rest (using Zamunda-managed keys).
+  - Lifecycle policies for tiering (standard → archive after 1 year, delete after 10 years).
+- **Bucket Structure:**
+  ```
+  applications/
+    {application_id}/
+      {file_hash}_{original_filename}
+  audit_exports/
+    {export_id}_{timestamp}.tar.gz
+  ```
+- **Access:**
+  - Document reads are validated by the Application Service before serving.
+  - All access logged to the audit store.
+  - Presigned URLs for direct client uploads (with time-limited tokens).
+- **Rationale:**
+  - MinIO provides S3-compatible API, enabling easy migration to AWS S3 if data residency requirements change in future.
+  - Open-source, deployed on-premises within Zamunda.
+  - High performance for concurrent uploads and downloads.
+  - Cost-efficient alternative to proprietary cloud object storage.
+  - Supports multi-part uploads for resilient document handling (supports future ADR-03 enhancement for chunked uploads).
+
+## Consequences
+
+### Positive
+- **Unified PostgreSQL Expertise:** Development and operations teams use PostgreSQL as the primary database; reduced learning curve.
+- **Audit Integrity:** Append-only enforcement at database level (role-based access control) provides strong guarantees against tampering.
+- **Cost Efficiency:** No expensive append-only database licenses; MinIO is open-source.
+- **On-Premises Deployment:** All components run within Zamunda; data residency requirement met.
+- **Scalability:** PostgreSQL replication, MinIO distributed mode, and Kafka ([ADR-04](./adr-04-event-driven-communication.md)) support horizontal scaling.
+- **Operational Simplicity:** Fewer distinct technologies to monitor, backup, and maintain.
+
+### Negative
+- **Operational Overhead:** Two PostgreSQL instances (operational + audit) to manage separately; requires dedicated DevOps attention.
+- **Audit Integrity Complexity:** Append-only constraint depends on application code + database access control; malicious DBA could bypass if both are compromised.
+- **Scaling Limits:** A single PostgreSQL instance for audit logs may experience write bottleneck under extreme load; PostgreSQL max write throughput ~10K TPS with replication.
+- **Cold Storage Management:** Archival of 10-year audit logs to cold storage requires manual or scheduled jobs.
+
+### Mitigation
+- **Monitoring:** Implement comprehensive monitoring of both PostgreSQL instances (replication lag, write latency, transaction rate).
+- **Immutability Validation:** Periodic cryptographic validation of audit log integrity (hash chain or signed exports).
+- **Backup Testing:** Regular restore drills to verify audit log recovery.
+- **Access Control Auditing:** Log all role and permission changes to a separate immutable audit table.
+- **Scaling Plan:** If audit write throughput exceeds PostgreSQL capacity, migrate to a dedicated append-only database (e.g., EventStoreDB or TimescaleDB) without changing the application interface.
+
+## Implementation Checklist
+
+- [ ] PostgreSQL 16+ cluster deployed in Kubernetes (Zamunda).
+- [ ] Separate instance for operational and audit databases.
+- [ ] Audit table created with strict access control (read-only and append-only roles).
+- [ ] MinIO cluster deployed in Kubernetes with 4+ nodes.
+- [ ] S3-compatible SDKs integrated into upload and review services.
+- [ ] Encryption at rest configured for both PostgreSQL and MinIO.
+- [ ] Backup policies confirmed (PostgreSQL: daily, 30-day retention; MinIO: object versioning enabled).
+- [ ] Monitoring dashboards created for both databases and MinIO.
+- [ ] Documentation written for DevOps team on deployment and maintenance.
+- [ ] Data migration plan (if migrating from legacy systems) documented.
+
+## References
+
+- [ADR-01: Polyglot Persistence Strategy](./adr-01-data-storage.md) – Pattern and rationale.
+- [ADR-03: Asynchronous Document Upload and Management Strategy](./adr-03-document-management.md) – Document handling workflow.
+- [ADR-04: Event-Driven Communication](./adr-04-event-driven-communication.md) – Integration with Kafka event bus.
+- [ac.md](../ac.md) – Auditability, Security, Scalability.
+- [asr.md](../asr.md) – Data Localization, Cost Efficiency.
+- [srs.md](../srs.md) – NF-SA-03 (retention), NF-SE-04 (audit logs).

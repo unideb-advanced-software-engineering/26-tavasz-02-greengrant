@@ -1,15 +1,12 @@
-<!-- ---
-# These are optional metadata elements. Feel free to remove any of them.
-status: "{proposed | rejected | accepted | deprecated | … | superseded by ADR-0123}"
-date: {YYYY-MM-DD when the decision was last updated}
-decision-makers: {list everyone involved in the decision}
-consulted: {list everyone whose opinions are sought (typically subject-matter experts); and with whom there is a two-way communication}
-informed: {list everyone who is kept up-to-date on progress; and with whom there is a one-way communication}
---- -->
+---
+title: "ADR-001: Hybrid architecture"
+description: "Hybrid architecture"
+---
 
-# ADR-001: Hybrid architecture
 
 - Status: Active
+- Date: 2026-04-13
+- Decision Makers: Architecture Team
 
 ## Context and Problem Statement
 
@@ -17,9 +14,6 @@ GreenGrant is part of the Zamunda Digital Renaissance (ZDR) program, providing a
 
 The key decision is: Which architectural style best ensures scalability, security, maintainability, and cost-efficiency while meeting these functional and operational requirements?
 
-<!--Describe the context and problem statement, e.g., in free form using two to three sentences or in the form of an illustrative story. You may want to articulate the problem in form of a question and add links to collaboration boards or issue management systems. -->
-
-<!-- This is an optional element. Feel free to remove. -->
 ## Decision Drivers
 
 - Scalability – Must handle millions of users and spikes in applications when new grants open.
@@ -75,7 +69,6 @@ Defined views in the LikeC4 model:
 
 - Testing and debugging across distributed services can be more challenging.
 
-<!-- This is an optional element. Feel free to remove. -->
 ### Confirmation
 
 The implementation of the hybrid service-based, event-driven architecture can be confirmed through the following measures:
