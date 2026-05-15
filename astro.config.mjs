@@ -10,19 +10,19 @@ import { LikeC4VitePlugin } from "likec4/vite-plugin";
 // https://astro.build/config
 export default defineConfig({
   site: "https://unideb-advanced-software-engineering.github.io",
-  base: "/26-spring-00-chocomarket",
+  base: "/26-tavasz-02-greengrant",
   vite: {
     plugins: [LikeC4VitePlugin({})],
   },
   integrations: [
     starlight({
-      title: "ChocoMarket",
+      title: "GreenGrant",
       defaultLocale: "hu",
       social: [
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/unideb-advanced-software-engineering/26-spring-00-chocomarket",
+          href: "https://github.com/unideb-advanced-software-engineering/26-tavasz-02-greengrant",
         },
       ],
       customCss: ["./src/styles/custom.css"],

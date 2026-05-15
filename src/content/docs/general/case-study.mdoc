@@ -1,8 +1,7 @@
 ---
-title: "Case Study: ChocoMarket"
-description: "A case study of the ChocoMarket system, which is part of the Zamunda Digital Renaissance program."
+title: "Case Study: GreenGrant"
+description: "A case study of the GreenGrant system, which is part of the Zamunda Digital Renaissance program."
 ---
-
 
 ## Background
 
@@ -22,30 +21,26 @@ This digital transformation program is called the Zamunda Digital Renaissance (Z
 
 ## Description
 
-Zamunda is extremely proud of its cocoa production and emerging chocolate industry. Currently, however, manufacturers' offerings are difficult to access and compare: rapidly changing inventories can only be tracked via email and phone calls or outdated websites. That's why a common, nationwide platform is needed: ChocoMarket.
+In addition to digital transformation, the ZDR program also supports the country's sustainability goals. A key component of this is an online support portal through which individuals and businesses can apply for government subsidies for green investments.
 
 ### Real world example
 
-Think of a platform like [Árukereső](https://www.arukereso.hu/), only here we also handle quantities and everything is chocolate.
+Consider [nffku.hu](https://nffku.hu), operated by the Hungarian National Energy Agency.
 
 ## Users
 
-- Chocolate manufacturers, of which there are currently around 50 in the country, but their number is growing every year.
-- Companies interested in chocolate, who can browse it from all over the world.
+- All citizens of Zamunda, approximately 10 million people.
+- Businesses operating in Zamunda, approximately 1 million businesses.
+- Administrators in the Zamunda public administration.
 
 ## Requirements
 
-- Manufacturers make their inventories available in a variety of formats: they upload them to an FTP server, send them by email, provide an HTTP API, and so on. Of course, the file formats can also vary: XML, CSV, JSON. ChocoMarket must be able to handle all of these sources.
-- It must strive to display the most up-to-date inventory information possible.
-- Manufacturers can view their scanned inventories as well as previous inventory scanning attempts.
-- Manufacturers have identical products (such as 100-gram bars of chocolate with 72% cocoa content), and the inventories associated with these products must be managed as a single entity. However, it is important to remember that even though the product is identical, other attributes (such as price) may differ!
-- Display of products, including stocks by manufacturer, in web format.
-- Display of product stock and price history in web format.
-- Interested parties can subscribe to stock notifications.
-- The web interface should be available in multiple languages.
-
-## Additions
-
-- It is not possible to make purchases through the system; it is only used to assess manufacturers' stocks and connect manufacturers and buyers.
-- A long-term goal is that, at some point in the future, it will also be possible to make purchases through the platform.
-- There is no need to manage special offers or promotions.
+- Data protection considerations are of paramount importance:
+  - Data processed by the system must be stored within Zamunda's territory, and the system must be operated within Zamunda's territory.
+- Each grant application consists of a specific framework, required documentation, and the amount of money that can be requested per application. The following dates are also specified: the opening date of the application and the deadline for submitting applications.
+- Administrators can post new applications with unique conditions and scoring systems for each application, as well as the required documents.
+- While some applications target smaller segments, many applications can expect a significant number of applicants who want to apply immediately when the application opens so that the budget is not exhausted.
+- Applicants must be provided with a web interface that also works properly on mobile devices.
+- Administrators must be provided with a web interface.
+- Integration with the MundaMail API is required; applicants must be notified of the final outcome of the evaluation through this API.
+- Since a significant amount of documentation must be reviewed in order to evaluate applications, it would be beneficial to assist administrators with some kind of AI-based tool.
