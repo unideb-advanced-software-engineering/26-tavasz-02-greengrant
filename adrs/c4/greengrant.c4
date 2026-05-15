@@ -2,24 +2,48 @@ specification {
   element actor {
     style {
       shape person
+      icon bootstrap:person-fill
+      color amber
     }
   }
-  element system
-  element app
-  element service
+  element system {
+    style {
+      icon bootstrap:diagram-3
+      color indigo
+    }
+  }
+  element app {
+    style {
+      shape browser
+      icon bootstrap:window
+      color green
+    }
+  }
+  element service {
+    style {
+      icon bootstrap:gear
+      color secondary
+    }
+  }
   element database {
     style {
       shape cylinder
+      icon bootstrap:database
+      color muted
     }
   }
   element queue {
     style {
       shape queue
+      icon bootstrap:diagram-3
+      color amber
     }
   }
   element component {
     style {
       shape component
+      icon bootstrap:boxes
+      color muted
     }
   }
 }
@@ -34,30 +58,31 @@ model {
   greengrant = system 'GreenGrant Platform' {
     applicant_web = app 'Applicant Web App' {
       technology 'SPA'
-      style {
-        shape browser
-      }
+      icon bootstrap:window
     }
 
     admin_web = app 'Administration Web App' {
       technology 'Web App'
-      style {
-        shape browser
-      }
+      icon bootstrap:window
     }
 
     backend_api = service 'API Gateway' {
       technology 'REST API Gateway'
       description 'Entry point for web applications, routes requests to backend services'
+      icon bootstrap:arrows-angle-contract
     }
 
     identity_access = service 'Identity and Access' {
       technology 'Auth Service (MFA + RBAC)'
+      icon bootstrap:shield-lock
     }
 
-    grant_service = service 'Grant Management Service'
+    grant_service = service 'Grant Management Service' {
+      icon bootstrap:clipboard-check
+    }
 
     application_service = service 'Application Service' {
+      icon bootstrap:file-earmark-text
       request_api = component 'Application API'
       validation_engine = component 'Validation Engine'
       eligibility_checker = component 'Eligibility Checker'
@@ -76,6 +101,7 @@ model {
 
     review_service = service 'Review Service' {
       description 'Handles grant application evaluation, scoring, and decision recording'
+      icon bootstrap:search
       query_api = component 'Review Query API'
       decision_engine = component 'Decision Engine'
       scoring_evaluator = component 'Scoring Evaluator'
@@ -88,6 +114,7 @@ model {
 
     ai_assistant = service 'AI Assistant Service' {
       description 'Provides AI-powered document analysis and summarization'
+      icon bootstrap:robot
       document_analyzer = component 'Document Analyzer'
       llm_interface = component 'LLM Interface'
       result_formatter = component 'Result Formatter'
@@ -98,6 +125,7 @@ model {
 
     notification_worker = service 'Notification Worker' {
       description 'Event consumer that sends notifications via MundaMail'
+      icon bootstrap:envelope-paper
       event_consumer = component 'Event Consumer'
       notification_composer = component 'Notification Composer'
       mail_sender = component 'Mail Sender'
@@ -108,18 +136,26 @@ model {
 
     core_db = database 'Core Database' {
       technology 'PostgreSQL'
+      description 'Operational state: users, grants, applications, evaluations, document metadata'
+      icon tech:postgresql
     }
 
     audit_log = database 'Audit Log Store' {
-      technology 'Append-only DB'
+      technology 'PostgreSQL (Append-Only)'
+      description 'Separate PostgreSQL instance with write-once constraint for immutable audit trail'
+      icon tech:postgresql
     }
 
     document_store = database 'Document Store' {
-      technology 'Object Storage'
+      technology 'MinIO (S3-Compatible)'
+      description 'On-premises object storage for applicant-uploaded documents with versioning and lifecycle policies'
+      icon tech:minio
     }
 
     event_bus = queue 'Event Bus' {
-      technology 'Kafka'
+      technology 'Apache Kafka'
+      description 'Distributed event streaming platform for asynchronous communication between services (application events, review decisions, notifications)'
+      icon tech:kafka
     }
 
     applicant_web -> backend_api 'calls APIs over HTTPS'
