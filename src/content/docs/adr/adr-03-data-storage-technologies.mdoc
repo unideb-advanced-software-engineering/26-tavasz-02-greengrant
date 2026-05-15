@@ -9,7 +9,7 @@ description: "Database and Storage Technology Stack"
 
 ## Context and Problem Statement
 
-[ADR-02: Polyglot Persistence Strategy](./adr-02-data-storage.mdoc) established that GreenGrant will use three specialized data stores: a transactional core database, an append-only audit log store, and a document/object store. However, the specific technology implementations for each store were not yet selected.
+[ADR-02: Polyglot Persistence Strategy](/26-tavasz-02-greengrant/adr/adr-02-data-storage) established that GreenGrant will use three specialized data stores: a transactional core database, an append-only audit log store, and a document/object store. However, the specific technology implementations for each store were not yet selected.
 
 **The Problem:** Multiple viable technologies exist for each store pattern. Without explicit technology choices, development teams lack clarity on setup, configuration, and operational practices:
 
@@ -137,7 +137,7 @@ description: "Database and Storage Technology Stack"
 - **Audit Integrity:** Append-only enforcement at database level (role-based access control) provides strong guarantees against tampering.
 - **Cost Efficiency:** No expensive append-only database licenses; MinIO is open-source.
 - **On-Premises Deployment:** All components run within Zamunda; data residency requirement met.
-  - **Scalability:** PostgreSQL replication, MinIO distributed mode, and Kafka ([ADR-04](./adr-04-event-driven-communication.mdoc)) support horizontal scaling.
+  - **Scalability:** PostgreSQL replication, MinIO distributed mode, and Kafka ([ADR-04](/26-tavasz-02-greengrant/adr/adr-04-event-driven-communication)) support horizontal scaling.
 - **Operational Simplicity:** Fewer distinct technologies to monitor, backup, and maintain.
 
 ### Negative
@@ -168,9 +168,9 @@ description: "Database and Storage Technology Stack"
 
 ## References
 
-- [ADR-02: Polyglot Persistence Strategy](./adr-02-data-storage.mdoc) – Pattern and rationale.
-- [ADR-03: Asynchronous Document Upload and Management Strategy](./adr-03-data-storage-technologies.mdoc) – Document handling workflow.
-- [ADR-04: Event-Driven Communication](./adr-04-event-driven-communication.mdoc) – Integration with Kafka event bus.
-- [ac](../requirements/ac.mdoc) – Auditability, Security, Scalability.
-- [asr](../requirements/asr.mdoc) – Data Localization, Cost Efficiency.
-- [srs](../requirements/srs.mdoc) – NF-SA-03 (retention), NF-SE-04 (audit logs).
+- [ADR-02: Polyglot Persistence Strategy](/26-tavasz-02-greengrant/adr/adr-02-data-storage) – Pattern and rationale.
+- [ADR-03: Asynchronous Document Upload and Management Strategy](/26-tavasz-02-greengrant/adr/adr-03-data-storage-technologies) – Document handling workflow.
+- [ADR-04: Event-Driven Communication](/26-tavasz-02-greengrant/adr/adr-04-event-driven-communication) – Integration with Kafka event bus.
+- [ac](/26-tavasz-02-greengrant/requirements/ac) – Auditability, Security, Scalability.
+- [asr](/26-tavasz-02-greengrant/requirements/asr) – Data Localization, Cost Efficiency.
+- [srs](/26-tavasz-02-greengrant/requirements/srs) – NF-SA-03 (retention), NF-SE-04 (audit logs).

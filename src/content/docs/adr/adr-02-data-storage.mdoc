@@ -11,19 +11,19 @@ description: "Polyglot Persistence Strategy"
 
 GreenGrant must store diverse data types with different access patterns and durability requirements:
 
-1. **Transactional operational data** (users, grants, applications, evaluations) – requires ACID guarantees and strong consistency.
-2. **Immutable audit trails** – must be append-only and tamper-evident for legal compliance and audit reconstruction.
-3. **Large binary documents** (applicant PDFs, scans) – accessed by reference, not frequently queried relationally.
+1. **Transactional operational data** (users, grants, applications, evaluations) - requires ACID guarantees and strong consistency.
+2. **Immutable audit trails** - must be append-only and tamper-evident for legal compliance and audit reconstruction.
+3. **Large binary documents** (applicant PDFs, scans) - accessed by reference, not frequently queried relationally.
 
 A single database cannot efficiently serve all three patterns without compromising design or performance. The question is: Should we use a single database with separate schemas, or adopt polyglot persistence with specialized stores for each pattern?
 
 ## Decision Drivers
 
-- **Regulatory Compliance** – Audit logs must be immutable and cryptographically verifiable; this is a core legal requirement [NF-SE-04, NF-QA-03, Auditability in ac.md].
-- **Storage Cost Efficiency** – Large files (application documents) should not bloat the transactional database; cloud object storage is cost-optimal. [ASR: Cost Efficiency]
-- **Query Performance** – Auditors need to reconstruct application history efficiently; append-only stores are optimized for this pattern.
-- **Data Localization** – All storage must remain within Zamunda; infrastructure selection must respect this constraint. [ASR: Data Localization]
-- **Long-term Retention** – Applications and evaluations must be preserved for 10 years [NF-SA-03]; tiered archival strategies differ per store type.
+- **Regulatory Compliance** - Audit logs must be immutable and cryptographically verifiable; this is a core legal requirement [NF-SE-04, NF-QA-03, Auditability in ac.md].
+- **Storage Cost Efficiency** - Large files (application documents) should not bloat the transactional database; cloud object storage is cost-optimal. [ASR: Cost Efficiency]
+- **Query Performance** - Auditors need to reconstruct application history efficiently; append-only stores are optimized for this pattern.
+- **Data Localization** - All storage must remain within Zamunda; infrastructure selection must respect this constraint. [ASR: Data Localization]
+- **Long-term Retention** - Applications and evaluations must be preserved for 10 years [NF-SA-03]; tiered archival strategies differ per store type.
 
 ## Considered Options
 
@@ -67,11 +67,11 @@ A single database cannot efficiently serve all three patterns without compromisi
 **Purpose:** Operational state, business logic, transactional boundaries.
 
 **Stores:**
-- `users` – User accounts, roles, status, credentials.
-- `grants` – Grant definitions, budgets, dates, criteria, scoring models.
-- `applications` – Application metadata (applicant ID, grant ID, status, submission date, decision).
-- `evaluations` – Review scores, decision status, reviewer ID, timestamps.
-- `document_metadata` – Links to document store objects (object ID, filename, size, content hash).
+- `users` - User accounts, roles, status, credentials.
+- `grants` - Grant definitions, budgets, dates, criteria, scoring models.
+- `applications` - Application metadata (applicant ID, grant ID, status, submission date, decision).
+- `evaluations` - Review scores, decision status, reviewer ID, timestamps.
+- `document_metadata` - Links to document store objects (object ID, filename, size, content hash).
 
 **Constraints:**
 - Foreign keys maintain referential integrity.
@@ -137,15 +137,15 @@ A single database cannot efficiently serve all three patterns without compromisi
 
 Implementation can be verified through:
 
-1. **Schema Review** – Inspect Core DB schema for presence of expected tables and audit timestamp columns.
-2. **Audit Log Integrity Test** – Attempt to update or delete a historical audit record; verify that the database rejects the operation.
-3. **Document Storage Test** – Upload a document, verify it exists in object storage with correct metadata and access controls.
-4. **Retention Validation** – Confirm that archival and deletion policies are in place and documented.
-5. **Compliance Audit** – An independent auditor verifies that the audit log provides a complete reconstruction of state changes.
+1. **Schema Review** - Inspect Core DB schema for presence of expected tables and audit timestamp columns.
+2. **Audit Log Integrity Test** - Attempt to update or delete a historical audit record; verify that the database rejects the operation.
+3. **Document Storage Test** - Upload a document, verify it exists in object storage with correct metadata and access controls.
+4. **Retention Validation** - Confirm that archival and deletion policies are in place and documented.
+5. **Compliance Audit** - An independent auditor verifies that the audit log provides a complete reconstruction of state changes.
 
 ## References
 
-- [ac](../requirements/ac.mdoc) – Auditability, Security
-- [asr](../requirements/asr.mdoc) – Data localization, ASRs for F-AG-03, F-RE-04
-- [architecture style](../architecture/architectural-style.mdoc) – Storage Architecture subsection
-- [SRS](../requirements/srs.mdoc) – NF-SA-03 (retention), NF-SE-03 (encryption), NF-SE-04 (audit logs)
+- [ac](/26-tavasz-02-greengrant/requirements/ac) - Auditability, Security
+- [asr](/26-tavasz-02-greengrant/requirements/asr) - Data localization, ASRs for F-AG-03, F-RE-04
+- [architecture style](/26-tavasz-02-greengrant/architecture/architectural-style) - Storage Architecture subsection
+- [SRS](/26-tavasz-02-greengrant/requirements/srs) - NF-SA-03 (retention), NF-SE-03 (encryption), NF-SE-04 (audit logs)
