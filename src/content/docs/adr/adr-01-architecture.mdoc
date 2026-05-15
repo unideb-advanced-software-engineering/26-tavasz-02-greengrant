@@ -1,15 +1,12 @@
-<!-- ---
-# These are optional metadata elements. Feel free to remove any of them.
-status: "{proposed | rejected | accepted | deprecated | … | superseded by ADR-0123}"
-date: {YYYY-MM-DD when the decision was last updated}
-decision-makers: {list everyone involved in the decision}
-consulted: {list everyone whose opinions are sought (typically subject-matter experts); and with whom there is a two-way communication}
-informed: {list everyone who is kept up-to-date on progress; and with whom there is a one-way communication}
---- -->
+---
+title: "ADR-001: Hybrid architecture"
+description: "Hybrid architecture"
+---
 
-# ADR-001: Hybrid architecture
 
 - Status: Active
+- Date: 2026-04-13
+- Decision Makers: Architecture Team
 
 ## Context and Problem Statement
 
@@ -17,9 +14,6 @@ GreenGrant is part of the Zamunda Digital Renaissance (ZDR) program, providing a
 
 The key decision is: Which architectural style best ensures scalability, security, maintainability, and cost-efficiency while meeting these functional and operational requirements?
 
-<!--Describe the context and problem statement, e.g., in free form using two to three sentences or in the form of an illustrative story. You may want to articulate the problem in form of a question and add links to collaboration boards or issue management systems. -->
-
-<!-- This is an optional element. Feel free to remove. -->
 ## Decision Drivers
 
 - Scalability – Must handle millions of users and spikes in applications when new grants open.
@@ -43,7 +37,18 @@ The key decision is: Which architectural style best ensures scalability, securit
 ## Decision Outcome
 
 Chosen option: Hybrid Service-Based with Event-Driven Architecture, because it best balances scalability, reliability, and maintainability. This approach allows the system to decompose core functionality into independent services while using event-driven patterns to handle high traffic and asynchronous workflows, such as mass grant submissions and AI-assisted document processing. It meets critical decision drivers like data residency, cost efficiency, and integration with the MundaMail API, while supporting future extensibility and alignment with ZDR’s sustainability goals.
-<!-- This is an optional element. Feel free to remove. -->
+
+## C4 model views
+
+The project now includes a native LikeC4 model:
+
+- Model source: [c4/greengrant.c4](./c4/greengrant.c4)
+
+Defined views in the LikeC4 model:
+
+- `l1_context` - C4 Level 1 (System Context)
+- `l2_containers` - C4 Level 2 (Container)
+- `l3_application_service` - C4 Level 3 (Component)
 ### Consequences
 
 #### Pros  
@@ -64,7 +69,6 @@ Chosen option: Hybrid Service-Based with Event-Driven Architecture, because it b
 
 - Testing and debugging across distributed services can be more challenging.
 
-<!-- This is an optional element. Feel free to remove. -->
 ### Confirmation
 
 The implementation of the hybrid service-based, event-driven architecture can be confirmed through the following measures:

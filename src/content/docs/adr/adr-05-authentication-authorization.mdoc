@@ -1,0 +1,177 @@
+---
+title: "ADR-005: Centralized Identity and Access Management with MFA and RBAC"
+description: "Centralized Identity and Access Management with MFA and RBAC"
+---
+
+- Status: Active
+- Date: 2026-05-15
+- Decision Makers: Security/Architecture Team
+
+## Context and Problem Statement
+
+GreenGrant serves four distinct user types with different responsibilities and risk profiles:
+
+1. **Applicants** – Citizens and businesses applying for grants; lowest privilege level.
+2. **Public Administrators** – Government employees reviewing applications and creating grants; high privilege.
+3. **System Administrators** – Responsible for user lifecycle and platform configuration; highest privilege.
+4. **External Services** – MundaMail API requires authenticated integration; must be accountable.
+
+The question is: How should we implement authentication and authorization to ensure **secure access**, **auditability**, **compliance with role-based access control**, and **resistance to account compromise**?
+
+## Decision Drivers
+
+- **Security Requirement [NF-SE-02]** – Public Administrator and System Administrator accounts must enforce multi-factor authentication (MFA).
+- **Auditability [NF-QA-03, Auditability in ac.md]** – All authentication and role assignment changes must be audit-logged.
+- **Least Privilege [ASR: Security]** – Users should have minimal permissions necessary for their role.
+- **Compliance with Public Sector Standards** – Zamunda's government likely mandates identity federation or LDAP integration; must be flexible to support this.
+- **User Lifecycle Management [F-MU-01, F-MU-02, F-MU-04]** – System must support account creation, role assignment, disabling, and history tracking.
+- **Service-to-Service Authenticity** – MundaMail integration and inter-service communication must use authenticated channels.
+
+## Considered Options
+
+### Option A: Decentralized Per-Service Authentication
+- Each service implements its own authentication and authorization; services trust each other on the network or via shared secrets.
+- **Pros:** Services are truly independent; no central point of failure.
+- **Cons:** Inconsistent security policies; identity information scattered across services; audit trail fragmented; difficult to enforce global role changes.
+
+### Option B: Centralized Identity & Access Service with Token-Based (OAuth2/JWT)
+- Single authoritative Identity and Access Service manages all users, roles, and authentication.
+- Services accept JSON Web Tokens (JWT) signed by the Identity Service; validate tokens locally.
+- MFA enforced at token issuance time; MFA status reflected in token claims.
+- **Pros:** Single source of truth for identity; easy to change roles globally; audit trail centralized.
+- **Cons:** Token revocation is eventual (cached tokens remain valid until expiry); requires careful clock synchronization; token theft exposes all services.
+
+### Option C: Centralized Identity Service with per-request Authorization Checks
+- Identity Service issues tokens; all services validate tokens and check authorization against the Identity Service on each request.
+- **Pros:** Immediate revocation; can enforce context-aware policies (e.g., location, time).
+- **Cons:** Higher latency (extra RPC per request); increased load on Identity Service; potential bottleneck.
+
+### Option D: LDAP/Federation with Local Caching
+- Integrate with existing Zamunda government LDAP or identity federation service.
+- Services cache identity and role information locally; periodically refresh.
+- **Pros:** Leverages existing government infrastructure; users managed centrally.
+- **Cons:** Requires tight coupling to government infrastructure; offline-mode fallback is complex.
+
+## Decision Outcome
+
+**Chosen option: Option B (Centralized Identity & Access Service with Token-Based OAuth2/JWT)**, with a fallback integration path for government LDAP/federation (Option D).
+
+### Rationale
+
+1. **Practical Auditability:** A centralized service logs all authentication and role changes in one place, making audit reconstruction straightforward.
+
+2. **MFA Enforcement:** We implement MFA at the Identity Service layer. When a privileged user (Public Administrator, System Administrator) requests a token, the service enforces MFA before issuing a JWT. The JWT includes an `mfa_verified` claim.
+
+3. **Service Autonomy:** Services don't need to call back to the Identity Service for every request (avoiding Option C's latency); they validate the JWT signature locally. This reduces operational coupling.
+
+4. **Cost Efficiency:** Lighter-weight than a full per-request auth check; token-based approach is standard in modern microservices.
+
+5. **Regulatory Flexibility:** If Zamunda government mandates federation later, the Identity Service can be a bridge: accept government SAML/LDAP credentials, issue JWT tokens to internal services. This isolates the federation complexity to one service.
+
+## Detailed Design
+
+### Identity & Access Service (Centralized)
+
+**Responsibilities:**
+- User account lifecycle (create, update, disable, delete).
+- Role assignment and validation.
+- MFA enrollment, verification, and enforcement.
+- JWT token issuance and signing.
+- All identity and authorization events logged to audit store.
+
+### MFA Implementation
+
+**For Applicants:** Optional (to be encouraged, not enforced).
+
+**For Public Administrators and System Administrators:** Mandatory.
+
+**MFA Methods:**
+- Time-based One-Time Password (TOTP) using authenticator apps (Google Authenticator, Authy).
+- Backup codes stored securely.
+
+**Enforcement Logic:**
+- On login, if user has MFA enabled, Identity Service prompts for MFA code.
+- Only after successful MFA verification is the JWT issued with `mfa_verified: true`.
+- Services can reject requests with `mfa_verified: false` for sensitive operations (role changes, grant creation).
+
+### RBAC Model
+
+**Roles:**
+- `applicant` – Can view available grants, submit applications, view own application status.
+- `public_administrator` – Can create grants, review applications, assign scores, make decisions, request AI assistance.
+- `system_administrator` – Can manage users, assign roles, modify system configuration, view audit logs.
+
+**Authorization Example (in a service):**
+```
+If action = "CreateGrant" then require role "public_administrator"
+If action = "AssignRole" then require role "system_administrator" AND mfa_verified = true
+If action = "ViewApplication" then require (role = "public_administrator" OR (role = "applicant" AND owns_application))
+```
+
+### Service-Side Token Validation
+
+**All services validate tokens by:**
+1. Checking JWT signature using the Identity Service's public key (cached locally, refreshed periodically).
+2. Checking token expiration.
+3. Extracting user ID and roles from claims.
+4. For sensitive operations, checking `mfa_verified` claim.
+
+**No service calls back to the Identity Service on every request, reducing latency and coupling.**
+
+### Service-to-Service Authentication
+
+Inter-service calls (e.g., Application Service calling Core Database API):
+- Use JWT tokens issued to the service itself (service account).
+- Or use mutual TLS (mTLS) for encrypted, authenticated channels.
+
+**External Integration (MundaMail API):**
+- MundaMail uses API keys issued and rotated by the Identity Service.
+- API key usage logged in audit store.
+
+### Audit Logging
+
+**All events logged:**
+- User created, updated, disabled
+- Role assigned, revoked
+- MFA enrolled, verified
+- Token issued, revoked
+- Failed login attempts (rate limiting triggers logged)
+
+**Audit records include:** timestamp, actor, action, entity (user ID), old/new state.
+
+## Consequences
+
+### Positive
+- **Single Source of Truth** – Identity information managed centrally; role changes are immediate across all services.
+- **Strong Auditability** – All identity events logged; auditors can reconstruct who did what, when.
+- **MFA Compliance** – NF-SE-02 requirement directly met; privileged accounts protected.
+- **Operational Simplicity** – Services don't need to manage users; they trust the Identity Service's signatures.
+- **Scalability** – Token-based approach scales well; services validate locally without calling back on every request.
+
+### Negative
+- **Token Revocation Latency** – If a token is issued and then a user's role is revoked, cached tokens remain valid until expiry. For very sensitive operations, services could call back to the Identity Service, but this is optional.
+- **Secret Management** – The Identity Service's signing key must be protected carefully; compromise exposes the entire system.
+- **Clock Synchronization** – Token expiry relies on system clocks being synchronized.
+
+### Mitigation
+- Implement token revocation with short expiry times (e.g., 15 minute tokens, 7-day refresh tokens). For sensitive operations, call back to verify current role.
+- Store signing keys in a secure key management system (within Zamunda's territory).
+- Use NTP for clock synchronization.
+- Implement rate limiting on failed login attempts to resist brute force attacks.
+
+## Confirmation
+
+Implementation can be verified through:
+
+1. **MFA Test** – Create a System Administrator account, attempt login with MFA disabled, verify rejection; enable MFA, complete MFA challenge, verify token issued with `mfa_verified=true`.
+2. **Token Validation Test** – Tamper with a JWT token, attempt to use it in a request, verify rejection.
+3. **Role-Based Access Test** – Create two users with different roles, verify that each can only access resources matching their role.
+4. **Audit Log Completeness** – Review audit logs for a user lifecycle (created, role assigned, MFA enrolled, login attempt), verify all events are recorded.
+5. **LDAP Integration Test (if applicable)** – If government LDAP is integrated, verify that users created in LDAP can authenticate via GreenGrant.
+
+## References
+
+- [ac.md](../ac.md) – Security
+- [asr.md](../asr.md) – Security, F-MU-01 through F-MU-04
+- [as.md](../as.md) – Integration Points
+- [SRS](../srs.md) – NF-SE-02, F-MU-01, F-MU-02, F-MU-03, F-MU-04
