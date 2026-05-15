@@ -31,12 +31,13 @@
 
 /* Make hero image bigger */
 .hero img {
+  object-fit: contain;
   max-width: 2000px; /* increase this */
   height: auto;
 }
 
 /* Optional: increase container size */
-.hero .hero-image {
+/* .hero .hero-image {
   max-width: 3000px;
   height: 3000px;
-}
+} */
