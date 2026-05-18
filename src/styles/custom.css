@@ -48,17 +48,5 @@
 }
 
 
-.table-of-contents li:first-child > a {
-  visibility: hidden;
-  position: relative;
-}
-
-
-.table-of-contents li:first-child > a::before {
-  content: "Introduction"; /* 👈 your custom name */
-  visibility: visible;
-  position: absolute;
-  left: 0;
-}
 
 

@@ -60,61 +60,6 @@ A single database cannot efficiently serve all three patterns without compromisi
 
 4. **Regulatory Alignment:** Public-sector environments often require audits that produce read-only extracts of system behavior. An append-only audit store naturally supports this requirement; documents are versioned and retrievable by audit queries without risk of retroactive modification.
 
-## Detailed Design
-
-### Core Database (PostgreSQL)
-
-**Purpose:** Operational state, business logic, transactional boundaries.
-
-**Stores:**
-- `users` - User accounts, roles, status, credentials.
-- `grants` - Grant definitions, budgets, dates, criteria, scoring models.
-- `applications` - Application metadata (applicant ID, grant ID, status, submission date, decision).
-- `evaluations` - Review scores, decision status, reviewer ID, timestamps.
-- `document_metadata` - Links to document store objects (object ID, filename, size, content hash).
-
-**Constraints:**
-- Foreign keys maintain referential integrity.
-- Timestamps on all tables for ordering and audit correlation.
-- Soft deletes (status columns) rather than hard deletes to preserve history.
-
-### Audit Log Store (Append-Only)
-
-**Purpose:** Immutable record of all state changes for compliance and reconstruction.
-
-**Design:**
-- Single append-only table or collection.
-- Columns: `event_id`, `timestamp`, `actor_id`, `action` (created/updated/deleted), `entity_type`, `entity_id`, `previous_state`, `new_state`, `correlation_id`.
-- Each insert appends; no updates or deletes allowed (enforced by database access control or application design).
-
-**Examples of Logged Events:**
-- User created, user role assigned
-- Grant published, grant closed
-- Application submitted, application withdrawn
-- Evaluation initiated, score assigned, decision finalized
-- Document uploaded, document deleted
-
-**Retention:** All logs retained for 10 years per regulations. Archival to cold storage after 1 year.
-
-### Document Store (Object Storage)
-
-**Purpose:** Secure, scalable storage of applicant-uploaded documents.
-
-**Design:**
-- S3-compatible or cloud-native object storage within Zamunda.
-- Naming convention: `applications/{application_id}/{file_hash}_{original_filename}`.
-- Each object tagged with metadata: `application_id`, `upload_date`, `uploader_id`.
-- Content-addressable via SHA-256 hash to detect duplicates and bit rot.
-
-**Lifecycle Policies:**
-- Standard tier: Active application review period (while application is being evaluated).
-- Archive tier: After decision and 1-year post-decision (cost optimization).
-- Deletion: After 10-year retention period (per NF-SA-03).
-
-**Access:**
-- Document read requests route through the Core DB: `application_service` validates that the requester has authorization before serving the object.
-- All access is logged for audit purposes.
-
 ## Consequences
 
 ### Positive
